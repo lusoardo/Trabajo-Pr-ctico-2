@@ -1,13 +1,10 @@
 
-#TODOS LOS CODIGOS TIENEN 6 CARACTERES PERO ALGUNOS TIENE UN ESPACIO
 def procesar_linea_numeral(linea):
-    r1 = 0
-    r1 = r1 + 1
     montoA_L = int(linea[2:8])
     montoM_Z = int(linea[8:14])
     montoU = int(linea[14:20])
 
-    return montoA_L, montoM_Z, montoU, r1
+    return montoA_L, montoM_Z, montoU
 
 def procesar_linea(linea):
   nombre = linea[:25]
@@ -21,7 +18,11 @@ def procesar_linea(linea):
   return nombre,codigo,monto_base,cruz
 
 def calcular_monto(monto_base,montoA_L,montoM_Z,montoU,codigo):
+    global numero
+    global letra
     letra = codigo[0]
+    numero = int(codigo[1] + codigo[2])
+
     r2 = r3 = r4 = r5 = r6 = 0
     if letra == "A":
         r2 = r2 + 1
@@ -49,9 +50,29 @@ def calcular_monto(monto_base,montoA_L,montoM_Z,montoU,codigo):
     else:
         porcentaje = int(codigo[4] + codigo[5])
 
-    monto_final =  int(monto_final + monto_final * porcentaje / 100)
+    monto_final =  round((monto_final + monto_final * porcentaje / 100),2)
 
     return monto_final, r2, r3, r4, r5, r6
+
+def capitulo(monto_final):
+    suma_importe = 0
+    cant_pacientes = 0
+    if letra == "S" or (letra == "T" and numero <= 98):
+        suma_importe += monto_final
+        cant_pacientes += 1
+
+    return suma_importe, cant_pacientes
+
+def mayor(nombre,monto_final):
+    may = None
+    paciente_mayor = ''
+
+    if letra != 'U':
+        if may is None or may > monto_final:
+            may = monto_final
+            paciente_mayor = nombre
+
+    return paciente_mayor,may
 
 def principal():
     m = open('tratamientos.txt')
@@ -60,7 +81,7 @@ def principal():
             linea = linea[0:-1]
 
         if linea [0] == '#':
-            montoA_L, montoM_Z, montoU, r1 = procesar_linea_numeral(linea)
+            montoA_L, montoM_Z, montoU = procesar_linea_numeral(linea)
             print(montoA_L)
             print(montoM_Z)
             print(montoU)
@@ -68,6 +89,13 @@ def principal():
             nombre, codigo, monto_base, cruz = procesar_linea(linea)
             print(nombre, codigo, monto_base, cruz)
             monto_final,r2,r3,r4,r5,r6 = calcular_monto(monto_base,montoA_L,montoM_Z,montoU,codigo)
+            suma_importe, cant_pacientes = capitulo(monto_final)
+            r8,r9 = mayor(nombre,monto_final)
+
+
+    m.close()
+    if cant_pacientes != 0:
+     r7 = round(suma_importe / cant_pacientes,2)
 
     print('(r1) - Cantidad de tratamientos cargados:', r1)
     print('(r2) - Cantidad de tratamientos "A":', r2)
@@ -79,4 +107,6 @@ def principal():
     print('(r8) – Paciente (no tipo "U") que pagó el mayor importe final:', r8)
     print('(r9) - Mayor importe pagado por ese paciente):', r9)
     print('(r10)- Porcentaje de tratamientos de alta complejidad con coste mayor al promedio:', r10)
+
+
 principal()
